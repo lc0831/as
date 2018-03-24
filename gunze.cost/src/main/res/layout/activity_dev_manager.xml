@@ -19,10 +19,7 @@
             style="@style/textStyle"
             android:hint="请选择日期"
             android:inputType="date"/>
-    <DatePicker
-        android:id="@+id/date_picker"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"></DatePicker>
+
 
 
     <ListView
