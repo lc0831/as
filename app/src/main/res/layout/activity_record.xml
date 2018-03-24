@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.kunzi.hcctckunziapp.RecordActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorPrimary"
+            android:minHeight="?attr/actionBarSize"
+            android:theme="?attr/actionBarTheme"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+
+
+            <com.beardedhen.androidbootstrap.BootstrapButton
+                android:id="@+id/btn_depLogin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10pt"
+                android:layout_marginRight="10pt"
+                android:layout_marginTop="5pt"
+                android:text="设备登记"
+                app:bootstrapBrand="primary"
+                app:bootstrapSize="lg"
+                app:buttonMode="regular"
+                app:layout_constraintTop_toTopOf="parent"
+                app:roundedCorners="true"
+                app:showOutline="false" />
+            <com.beardedhen.androidbootstrap.BootstrapButton
+                android:id="@+id/btn_perLogin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10pt"
+                android:layout_marginRight="10pt"
+                android:layout_marginTop="5pt"
+                android:text="人员登记"
+                app:bootstrapBrand="primary"
+                app:bootstrapSize="lg"
+                app:buttonMode="regular"
+                app:layout_constraintTop_toTopOf="parent"
+                app:roundedCorners="true"
+                app:showOutline="false" />
+
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ListView
+                android:id="@+id/list_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"></ListView>
+        </LinearLayout>
+
+
+    </LinearLayout>
+</LinearLayout>

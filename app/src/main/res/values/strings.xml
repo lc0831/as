@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">GUNZE</string>
+    <string name="title_activity_menu">menuActivity</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="item_top_title">部门名称</string>
+    <string name="item_top_left_title">人员姓名</string>
+    <string name="item_top_center_title">工作时间</string>
+    <string name="item_top_right_title">工作日期</string>
+</resources>
