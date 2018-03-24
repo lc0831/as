@@ -31,11 +31,12 @@
     <Button
         android:id="@+id/btnPerManager"
         style="@style/buttonStyle"
-        android:layout_width="120dp"
+        android:layout_width="130dp"
         android:layout_height="120dp"
         android:layout_marginEnd="8dp"
         android:layout_marginTop="8dp"
         android:text="员工调动"
+
         app:layout_constraintEnd_toStartOf="@+id/guideline"
         app:layout_constraintTop_toTopOf="@+id/guideline2" />
 
