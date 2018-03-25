@@ -5,7 +5,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.example.gunzecost.DevManagerActivity">
+    tools:context="com.example.gunzecost.DevManagerActivity"
+    android:focusable="true"
+    android:focusableInTouchMode="true">
         <EditText
             android:id="@+id/txtDevice"
             style="@style/textStyle"

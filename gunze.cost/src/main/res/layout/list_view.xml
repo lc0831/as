@@ -11,14 +11,14 @@
         android:padding="20dp">
 
         <TextView
-            android:id="@+id/device_name"
+            android:id="@+id/item_Name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="设备名称"
             android:textSize="12pt" />
 
         <TextView
-            android:id="@+id/device_id"
+            android:id="@+id/item_code"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"

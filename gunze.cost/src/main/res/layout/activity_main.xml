@@ -47,7 +47,7 @@
         android:layout_height="120dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:text="数据上传"
+        android:text="数据管理"
         app:layout_constraintStart_toStartOf="@+id/guideline"
         app:layout_constraintTop_toTopOf="@+id/guideline2" />
     <android.support.constraint.Guideline

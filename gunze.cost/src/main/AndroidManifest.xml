@@ -18,8 +18,10 @@
         </activity>
         <activity android:name=".PerRecordActivity" />
         <activity android:name=".PerManagerActivity" />
-        <activity android:name=".DevManagerActivity" />
-        <activity android:name=".DataUpdateActivity"></activity>
+        <activity android:name=".DevManagerActivity"
+            android:label="设备管理"/>
+        <activity android:name=".DataUpdateActivity"
+            android:label="数据管理"></activity>
     </application>
 
 </manifest>
