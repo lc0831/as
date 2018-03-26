@@ -34,14 +34,14 @@ public class DBUtil {
         String result = "";
         try
         {
-            Connection conn = getSQLConnection("xx.xx.xx.xx", "sa", "123", "DataBaseName");
-            String sql = "select top 10 * from Users";
+            Connection conn = getSQLConnection("192.168.3.62", "sa", "server@123", "UFDATA_001_2014");
+            String sql = "select top 10 * from Department";
             Statement stmt = conn.createStatement();//
             ResultSet rs = stmt.executeQuery(sql);
             while (rs.next())
             {
-                String s1 = rs.getString("UserName");
-                String s2 = rs.getString("Password");
+                String s1 = rs.getString("cDepCode");
+                String s2 = rs.getString("cDepName");
                 result += s1 + "  -  " + s2 + "\n";
                 System.out.println(s1 + "  -  " + s2);
             }
