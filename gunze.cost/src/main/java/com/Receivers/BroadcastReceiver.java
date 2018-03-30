@@ -18,11 +18,15 @@ public class BroadcastReceiver extends android.content.BroadcastReceiver {
         //调用Message接口的方法
         message.getMsg(aa);
     }
-
-    interface Message {
+    /**
+     * 定义一个接口
+     */
+    public interface Message {
         public void getMsg(String str);
     }
-
+    /**
+     *提供公共的方法,并且初始化接口类型的数据
+     */
     public void setMessage(Message message) {
         this.message = message;
     }

@@ -34,8 +34,9 @@ public class DepartAdapter extends ArrayAdapter<department> {
 
     @Override
     /**
-     * @param position 当前设置的Cell行数，类似于iOS开发中的indexPath.row
+     * @param position 当前设置的Cell行数
      */
+
     public View getView(int position, View convertView, ViewGroup parent) {
         department depart = getItem(position);
 

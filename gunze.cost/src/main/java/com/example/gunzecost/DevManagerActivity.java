@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 import com.Receivers.BroadcastReceiver;
 import com.listAdapter.DepartAdapter;
+import com.listAdapter.MyAdapter;
 import com.model.department;
 import com.sqlHelper.departManager;
 
@@ -31,13 +32,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+import model.DeviceInfo;
+
 
 public class DevManagerActivity extends AppCompatActivity {
 
     private EditText txtDepart, txtDate;
-
+    private MyAdapter<DeviceInfo> devAdapter = null;
+    private List<DeviceInfo> devData = null;
     private List departList = new ArrayList<department>();
     BroadcastReceiver mbcr = new BroadcastReceiver();
+    private ListView listview;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,9 +51,14 @@ public class DevManagerActivity extends AppCompatActivity {
         //注册广播
         IntentFilter filter = new IntentFilter();
         filter.addAction("android.intent.ACTION_DECODE_DATA");
-        registerReceiver(mbcr, filter);// 注册
+        registerReceiver(mbcr, filter);
+        // 注册
+        txtDepart=findViewById(R.id.txtDepart);
+   /*     listview = findViewById(R.id.list_view);
+        myadapter = new ProductAdapter(RecordActivity.this, R.layout.listview, productList);
+        listview.setAdapter(myadapter);*/
         //选择部门
-        findViewById(R.id.txtDepart).setOnTouchListener(new View.OnTouchListener() {
+        txtDepart.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
@@ -70,7 +80,7 @@ public class DevManagerActivity extends AppCompatActivity {
                         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                             View curr = parent.getChildAt((int) id);
                             TextView c = curr.findViewById(R.id.item_Name);
-                            txtDepart.setText(c.getText().toString());
+                            txtDepart.setText(c.getText());
                             dialog.dismiss();
                         }
                     });
@@ -81,6 +91,7 @@ public class DevManagerActivity extends AppCompatActivity {
             }
 
         });
+        //选择日期
         findViewById(R.id.txtDate).setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -101,97 +112,40 @@ public class DevManagerActivity extends AppCompatActivity {
                 return true;
             }
         });
+        //数据初始化
+        devData = new ArrayList<DeviceInfo>();
 
-    }
-
-    private void InitView() {
-
-        txtDepart = findViewById(R.id.txtDepart);
-        txtDepart.setOnTouchListener(this);
-
-        txtDate = findViewById(R.id.txtDate);
-        txtDate.setOnTouchListener(this);
-
-
-
-      /*  departManager dm = new departManager(this);
-
-        ArrayList<HashMap<String, String>> departList =  dm.getdepartList();*/
-      /*  if(departList.size()!=0) {
-            //绑定listview
-            ProductAdapter adapter = new ProductAdapter(CustomeItemListViewActivity.this, R.layout.custome_item, productList);
-            ListView listView = (ListView)findViewById(R.id.second_list_view);
-            listView.setAdapter(adapter);
-            ListView lv = getListView();
-            lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view,int position, long id) {
-                    student_Id = (TextView) view.findViewById(R.id.student_Id);
-                    String studentId = student_Id.getText().toString();
-                    Intent objIndent = new Intent(getApplicationContext(),StudentDetail.class);
-                    objIndent.putExtra("student_Id", Integer.parseInt( studentId));
-                    startActivity(objIndent);
-                }
-            });
-            ListAdapter adapter = new SimpleAdapter( MainActivity.this,studentList, R.layout.view_student_entry, new String[] { "id","name"}, new int[] {R.id.student_Id, R.id.student_name});
-            setListAdapter(adapter);
-        }else{
-            Toast.makeText(this, "No depart!", Toast.LENGTH_SHORT).show();
-        }*/
-
-    }
-
-    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            action = intent.getStringExtra("barcode_string");
-        }
-
-    };
-
-    @Override
-    public boolean onTouch(View v, MotionEvent event) {
-        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-
-            AlertDialog.Builder builder;
-            View view;
-            final AlertDialog dialog;
-            DepartAdapter myadapter;
-            switch (v.getId()) {
-                case R.id.txtDepart:
-                    builder = new AlertDialog.Builder(this);
-                    view = View.inflate(this, R.layout.dialog_department, null);
-                    ListView departListView = view.findViewById(R.id.list_view);
-
-                    createProductList();
-                    myadapter = new DepartAdapter(this, R.layout.list_view, departList);
-                    departListView.setAdapter(myadapter);
-                    builder.setView(view);
-                    dialog = builder.show();
-
-
-                    departListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                        @Override
-                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                            View curr = parent.getChildAt((int) id);
-                            TextView c = curr.findViewById(R.id.item_Name);
-                            txtDepart.setText(c.getText().toString());
-                            dialog.dismiss();
-                        }
-                    });
-
-                    break;
-                case R.id.txtDate:
-
-                    break;
+        //填充适配器
+        devAdapter = new MyAdapter<DeviceInfo>((ArrayList)devData,R.layout.list_view) {
+            @Override
+            public void bindView(ViewHolder holder, DeviceInfo obj) {
+                holder.setText(R.id.item_code,obj.getDevID());
+                holder.setText(R.id.item_Name,obj.getDevname());
             }
+        };
+        //绑定数据
+        listview = findViewById(R.id.lv_dev);
+        listview.setAdapter(devAdapter);
+        mbcr.setMessage(new BroadcastReceiver.Message() {
+            @Override
+            public void getMsg(String str) {
+                //Adapter初始化
+                DeviceInfo devInfo=new DeviceInfo();
+                devInfo.setDevID(str);
+                devInfo.setDevname(str);
+                devData.add(devInfo);
+                devAdapter.notifyDataSetChanged();
+            }
+        });
 
-        }
-
-
-        return true;
     }
+
+
+
+
+
+
+
 
     @Override
     protected void onDestroy() {
@@ -200,6 +154,7 @@ public class DevManagerActivity extends AppCompatActivity {
     }
 
     private void createProductList() {
+        departList.clear();
         for (int i = 0; i < 3; i++) {
             department depart = new department();
             depart.depName = "缝制" + i + 1 + " A";
