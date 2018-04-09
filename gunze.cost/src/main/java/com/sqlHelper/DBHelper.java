@@ -12,7 +12,7 @@ import com.model.department;
 
 public class DBHelper extends SQLiteOpenHelper {
     //数据库版本号
-    private static final int DATABASE_VERSION=4;
+    private static final int DATABASE_VERSION=1;
 
     //数据库名称
     private static final String DATABASE_NAME="cost.db";
@@ -26,7 +26,7 @@ public class DBHelper extends SQLiteOpenHelper {
         //创建数据表
         String CREATE_TABLE_STUDENT="CREATE TABLE "+ department.TABLE+"("
                 +department.KEY_CODE+" TEXT PRIMARY KEY ,"
-                +department.KEY_NAME+" TEXT, ";
+                +department.KEY_NAME+" TEXT)";
         db.execSQL(CREATE_TABLE_STUDENT);
     }
 

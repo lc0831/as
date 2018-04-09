@@ -22,6 +22,7 @@ import com.Receivers.BroadcastReceiver;
 import com.listAdapter.DepartAdapter;
 import com.listAdapter.MyAdapter;
 import com.model.department;
+import com.sqlHelper.DBHelper;
 import com.sqlHelper.departManager;
 
 import java.text.SimpleDateFormat;
@@ -43,6 +44,7 @@ public class DevManagerActivity extends AppCompatActivity {
     private List departList = new ArrayList<department>();
     BroadcastReceiver mbcr = new BroadcastReceiver();
     private ListView listview;
+    private DBHelper dbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,13 +54,14 @@ public class DevManagerActivity extends AppCompatActivity {
         IntentFilter filter = new IntentFilter();
         filter.addAction("android.intent.ACTION_DECODE_DATA");
         registerReceiver(mbcr, filter);
-        // 注册
+        // 注册控件
         txtDepart=findViewById(R.id.txtDepart);
-   /*     listview = findViewById(R.id.list_view);
-        myadapter = new ProductAdapter(RecordActivity.this, R.layout.listview, productList);
-        listview.setAdapter(myadapter);*/
+        //注册数据库连接对象
+        dbHelper=new DBHelper(this);
+
+
         //选择部门
-        txtDepart.setOnTouchListener(new View.OnTouchListener() {
+        findViewById(R.id.txtDepart).setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
@@ -68,6 +71,8 @@ public class DevManagerActivity extends AppCompatActivity {
                     ListView departListView = view.findViewById(R.id.list_view);
                     //填充弹窗数据
                     createProductList();
+                    dbHelper.getWritableDatabase();
+
                     DepartAdapter myadapter = new DepartAdapter(DevManagerActivity.this, R.layout.list_view, departList);
                     departListView.setAdapter(myadapter);
                     //构建弹窗显示
@@ -84,8 +89,6 @@ public class DevManagerActivity extends AppCompatActivity {
                             dialog.dismiss();
                         }
                     });
-
-
                 }
                 return true;
             }
@@ -105,7 +108,6 @@ public class DevManagerActivity extends AppCompatActivity {
                 Calendar cal = Calendar.getInstance();
                 cal.setTimeInMillis(System.currentTimeMillis());
                 datePicker.init(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH), null);
-
 
                 final AlertDialog dialog = builder.show();
                 dialog.show();
@@ -139,14 +141,6 @@ public class DevManagerActivity extends AppCompatActivity {
         });
 
     }
-
-
-
-
-
-
-
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
