@@ -6,6 +6,7 @@ import org.ksoap2.serialization.SoapSerializationEnvelope;
 import org.ksoap2.transport.HttpTransportSE;
 import org.xmlpull.v1.XmlPullParserException;
 
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -19,7 +20,7 @@ import android.os.Message;
  * 访问WebService的工具类,
   */
 public class WebServiceUtils {
-    public static final String WEB_SERVER_URL = "http://www.webxml.com.cn/WebServices/WeatherWebService.asmx";
+    public static final String WEB_SERVER_URL = "http://192.168.3.164:8082/GZWebService.asmx";
 
 
     // 含有3个线程的线程池
