@@ -77,7 +77,7 @@ public class DataUpdateActivity extends AppCompatActivity implements View.OnClic
     private void queryFromServer(final String code, final String type) {
         String address;
         //address = "http://www.weather.com.cn/data/list3/city.xml";
-        address="http://192.168.3.164:8082/Cost/DepartmentSummary/GetDepart";
+        address="http://192.168.3.164:6666/api/webapi";
         HttpUtil.sendHttpRequest(address, new HttpUtil.HttpCallbackListener() {
             @Override
             public void onFinish(String response) {
