@@ -10,6 +10,9 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.model.department;
 import com.sqlHelper.DBUtil;
 import com.sqlHelper.HttpUtil;
 import com.sqlHelper.WebServiceUtils;
@@ -28,12 +31,14 @@ public class DataUpdateActivity extends AppCompatActivity implements View.OnClic
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_data_update);
+
         InitView();
     }
 
     private void InitView() {
         btnGetDepart = findViewById(R.id.btn_updatedepart);
         btnGetDepart.setOnClickListener(this);
+        progressBar = findViewById(R.id.progressBar);
     }
 
     @Override
@@ -55,36 +60,20 @@ public class DataUpdateActivity extends AppCompatActivity implements View.OnClic
         }
     }
 
-    /**
-     * 解析SoapObject对象
-     *
-     * @param result
-     * @return
-     */
-    private List<String> parseSoapObject(SoapObject result) {
-        List<String> list = new ArrayList<String>();
-        SoapObject provinceSoapObject = (SoapObject) result.getProperty("getSupportProvinceResult");
-        if (provinceSoapObject == null) {
-            return null;
-        }
-        for (int i = 0; i < provinceSoapObject.getPropertyCount(); i++) {
-            list.add(provinceSoapObject.getProperty(i).toString());
-        }
 
-        return list;
-    }
+
 
     private void queryFromServer(final String code, final String type) {
-        String address;
-        //address = "http://www.weather.com.cn/data/list3/city.xml";
-        address="http://192.168.3.164:6666/api/webapi";
-        HttpUtil.sendHttpRequest(address, new HttpUtil.HttpCallbackListener() {
+
+
+        HttpUtil.sendHttpRequest("GetDepart", new HttpUtil.HttpCallbackListener() {
             @Override
             public void onFinish(String response) {
                 boolean result = false;
-                if ("province".equals(type)) {
+                showProgressDialog();
+                Gson gson =new Gson();
+                List<department> departments=gson.fromJson(response,new TypeToken<List<department>>(){}.getType());
 
-                }
             }
 
             @Override
@@ -93,6 +82,14 @@ public class DataUpdateActivity extends AppCompatActivity implements View.OnClic
             }
         });
 
+    }
+
+    private void showProgressDialog() {
+        if (progressBar.getVisibility() == ProgressBar.VISIBLE) {
+            progressBar.setVisibility(ProgressBar.VISIBLE);
+        } else {
+            progressBar.setVisibility(ProgressBar.GONE);
+        }
     }
 
 

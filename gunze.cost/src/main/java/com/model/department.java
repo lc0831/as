@@ -13,6 +13,9 @@ public class department {
     public static final String KEY_NAME="depName";
 
     //属性
-    public String depCode;
-    public String depName;
+    public String cDepCode;
+    public String cDepName;
+
+
+
 }

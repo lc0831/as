@@ -25,8 +25,8 @@ public class departManager {
         //打开连接，写入数据
         SQLiteDatabase db=dbHelper.getWritableDatabase();
         ContentValues values=new ContentValues();
-        values.put(department.KEY_CODE,depart.depCode);
-        values.put(department.KEY_NAME,depart.depName);
+        values.put(department.KEY_CODE,depart.cDepCode);
+        values.put(department.KEY_NAME,depart.cDepName);
         //
         long depart_Id=db.insert(department.TABLE,null,values);
         db.close();
@@ -42,10 +42,10 @@ public class departManager {
         SQLiteDatabase db=dbHelper.getWritableDatabase();
         ContentValues values=new ContentValues();
 
-        values.put(department.KEY_CODE,depart.depCode);
-        values.put(department.KEY_NAME,depart.depName);
+        values.put(department.KEY_CODE,depart.cDepCode);
+        values.put(department.KEY_NAME,depart.cDepName);
 
-        db.update(department.TABLE,values,department.KEY_CODE+"=?" ,new String[]{depart.depCode});
+        db.update(department.TABLE,values,department.KEY_CODE+"=?" ,new String[]{depart.cDepCode});
     }
 
     public ArrayList<HashMap<String, String>> getdepartList(){
@@ -81,8 +81,8 @@ public class departManager {
         Cursor cursor=db.rawQuery(selectQuery,new String[]{departCode});
         if(cursor.moveToFirst()){
             do{
-                depart.depCode =cursor.getString(cursor.getColumnIndex(department.KEY_CODE));
-                depart.depName =cursor.getString(cursor.getColumnIndex(department.KEY_NAME));
+                depart.cDepCode =cursor.getString(cursor.getColumnIndex(department.KEY_CODE));
+                depart.cDepName =cursor.getString(cursor.getColumnIndex(department.KEY_NAME));
 
             }while(cursor.moveToNext());
         }

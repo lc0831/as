@@ -45,8 +45,8 @@ public class DepartAdapter extends ArrayAdapter<department> {
         TextView departCode =  departView.findViewById(R.id.item_code);
         TextView departName = departView.findViewById(R.id.item_Name);
 
-        departCode.setText(depart.depCode);
-        departName.setText(depart.depName);
+        departCode.setText(depart.cDepCode);
+        departName.setText(depart.cDepName);
 
 
         return departView;
