@@ -1,55 +1,41 @@
 package com.example.gunzecost;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.IntentFilter;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.InputType;
+import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.Receivers.BroadcastReceiver;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.listAdapter.DepartAdapter;
 import com.listAdapter.MyAdapter;
 import com.model.department;
-import com.sqlHelper.DBHelper;
+import com.model.deviceInfo;
 import com.sqlHelper.HttpUtil;
-import com.sqlHelper.departManager;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
-
-import model.DeviceInfo;
 
 
 public class DevManagerActivity extends AppCompatActivity {
 
     private EditText txtDepart, txtDate;
-    private MyAdapter<DeviceInfo> devAdapter = null;
-    private List<DeviceInfo> devData = null;
+    private MyAdapter<deviceInfo> devAdapter = null;
+    private MyAdapter<department> departAdapter = null;
+    private ArrayList<deviceInfo> devData = new ArrayList<>();
 
-    private List departList = new ArrayList<department>();
-    BroadcastReceiver mbcr = new BroadcastReceiver();
-    private ListView listview;
-    private DBHelper dbHelper;
+    private ArrayList<department> departData = new ArrayList<>();
+    BroadcastReceiver barcodeReceiver = new BroadcastReceiver();
+    private ListView listDepart, listDev;
+    private AlertDialog.Builder builder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,27 +44,42 @@ public class DevManagerActivity extends AppCompatActivity {
         //注册广播
         IntentFilter filter = new IntentFilter();
         filter.addAction("android.intent.ACTION_DECODE_DATA");
-        registerReceiver(mbcr, filter);
+        registerReceiver(barcodeReceiver, filter);
         // 注册控件
         txtDepart = findViewById(R.id.txtDepart);
+        View view = View.inflate(DevManagerActivity.this, R.layout.dialog_department, null);
+        listDepart = view.findViewById(R.id.list_view);
+        listDev = findViewById(R.id.lv_dev);
 
-        //注册数据库连接对象
-        dbHelper = new DBHelper(this);
-
-
+        //创建部门弹窗
+        builder = new AlertDialog.Builder(DevManagerActivity.this);
+        builder.setView(view);
+        //填充适配器
+        //设备
+        devAdapter = new MyAdapter<deviceInfo>(devData, R.layout.list_view) {
+            @Override
+            public void bindView(ViewHolder holder, deviceInfo obj) {
+                holder.setText(R.id.item_code, obj.getDevID());
+                holder.setText(R.id.item_Name, obj.getDevname());
+            }
+        };
+        listDev.setAdapter(devAdapter);
+        //部门
+        departAdapter = new MyAdapter<department>(departData, R.layout.list_view) {
+            @Override
+            public void bindView(ViewHolder holder, department obj) {
+                holder.setText(R.id.item_code, obj.getcDepCode());
+                holder.setText(R.id.item_Name, obj.getcDepName());
+            }
+        };
+        listDepart.setAdapter(departAdapter);
         //选择部门
         findViewById(R.id.txtDepart).setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
-
                     //填充弹窗数据
-
                     ShowDepartment();
-
-
-
-
                 }
                 return true;
             }
@@ -104,25 +105,11 @@ public class DevManagerActivity extends AppCompatActivity {
                 return true;
             }
         });
-        //数据初始化
-        devData = new ArrayList<DeviceInfo>();
-
-        //填充适配器
-        devAdapter = new MyAdapter<DeviceInfo>((ArrayList) devData, R.layout.list_view) {
-            @Override
-            public void bindView(ViewHolder holder, DeviceInfo obj) {
-                holder.setText(R.id.item_code, obj.getDevID());
-                holder.setText(R.id.item_Name, obj.getDevname());
-            }
-        };
-        //绑定数据
-        listview = findViewById(R.id.lv_dev);
-        listview.setAdapter(devAdapter);
-        mbcr.setMessage(new BroadcastReceiver.Message() {
+        barcodeReceiver.setMessage(new BroadcastReceiver.Message() {
             @Override
             public void getMsg(String str) {
                 //Adapter初始化
-                DeviceInfo devInfo = new DeviceInfo();
+                deviceInfo devInfo = new deviceInfo();
                 devInfo.setDevID(str);
                 devInfo.setDevname(str);
                 devData.add(devInfo);
@@ -134,9 +121,8 @@ public class DevManagerActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unregisterReceiver(mbcr);     //注销广播接收器
+        unregisterReceiver(barcodeReceiver);     //注销广播接收器
     }
-
 
 
     private void ShowDepartment() {
@@ -149,21 +135,14 @@ public class DevManagerActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         Gson gson = new Gson();
-                        departList = gson.fromJson(_response, new TypeToken<List<department>>() {
+                        departData = gson.fromJson(_response, new TypeToken<List<department>>() {
                         }.getType());
-                        if (departList.size() > 0){
-                            //创建弹窗list
-                            AlertDialog.Builder builder = new AlertDialog.Builder(DevManagerActivity.this);
-                            View view = View.inflate(DevManagerActivity.this, R.layout.dialog_department, null);
-                            ListView departListView = view.findViewById(R.id.list_view);
-
-                            DepartAdapter myadapter = new DepartAdapter(DevManagerActivity.this, R.layout.list_view, departList);
-                            departListView.setAdapter(myadapter);
+                        if (departData.size() > 0) {
+                            departAdapter.notifyDataSetChanged();
                             //构建弹窗显示
-                            builder.setView(view);
                             final AlertDialog dialog = builder.show();
 
-                            departListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                            listDepart.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                                 @Override
                                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                                     View curr = parent.getChildAt((int) id);
