@@ -11,6 +11,7 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.Receivers.BroadcastReceiver;
 import com.google.gson.Gson;
@@ -29,13 +30,11 @@ public class DevManagerActivity extends AppCompatActivity {
 
     private EditText txtDepart, txtDate;
     private MyAdapter<deviceInfo> devAdapter = null;
-    private MyAdapter<department> departAdapter = null;
     private ArrayList<deviceInfo> devData = new ArrayList<>();
 
     private ArrayList<department> departData = new ArrayList<>();
     BroadcastReceiver barcodeReceiver = new BroadcastReceiver();
-    private ListView listDepart, listDev;
-    private AlertDialog.Builder builder;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,13 +46,9 @@ public class DevManagerActivity extends AppCompatActivity {
         registerReceiver(barcodeReceiver, filter);
         // 注册控件
         txtDepart = findViewById(R.id.txtDepart);
-        View view = View.inflate(DevManagerActivity.this, R.layout.dialog_department, null);
-        listDepart = view.findViewById(R.id.list_view);
-        listDev = findViewById(R.id.lv_dev);
+        ListView listDev = findViewById(R.id.lv_dev);
 
-        //创建部门弹窗
-        builder = new AlertDialog.Builder(DevManagerActivity.this);
-        builder.setView(view);
+
         //填充适配器
         //设备
         devAdapter = new MyAdapter<deviceInfo>(devData, R.layout.list_view) {
@@ -64,15 +59,8 @@ public class DevManagerActivity extends AppCompatActivity {
             }
         };
         listDev.setAdapter(devAdapter);
-        //部门
-        departAdapter = new MyAdapter<department>(departData, R.layout.list_view) {
-            @Override
-            public void bindView(ViewHolder holder, department obj) {
-                holder.setText(R.id.item_code, obj.getcDepCode());
-                holder.setText(R.id.item_Name, obj.getcDepName());
-            }
-        };
-        listDepart.setAdapter(departAdapter);
+
+
         //选择部门
         findViewById(R.id.txtDepart).setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -138,8 +126,20 @@ public class DevManagerActivity extends AppCompatActivity {
                         departData = gson.fromJson(_response, new TypeToken<List<department>>() {
                         }.getType());
                         if (departData.size() > 0) {
-                            departAdapter.notifyDataSetChanged();
-                            //构建弹窗显示
+                            MyAdapter<department> departAdapter = new MyAdapter<department>(departData, R.layout.list_view) {
+                                @Override
+                                public void bindView(ViewHolder holder, department obj) {
+                                    holder.setText(R.id.item_code, obj.getcDepCode());
+                                    holder.setText(R.id.item_Name, obj.getcDepName());
+                                }
+                            };
+                            View dialogView = View.inflate(DevManagerActivity.this, R.layout.dialog_department, null);
+                            ListView listDepart = dialogView.findViewById(R.id.list_view);
+                            listDepart.setAdapter(departAdapter);
+
+                            //创建部门弹窗
+                            AlertDialog.Builder builder = new AlertDialog.Builder(DevManagerActivity.this);
+                            builder.setView(dialogView);
                             final AlertDialog dialog = builder.show();
 
                             listDepart.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -159,7 +159,12 @@ public class DevManagerActivity extends AppCompatActivity {
 
             @Override
             public void onError(Exception e) {
-
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(DevManagerActivity.this, "加载失败", Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
         });
 
