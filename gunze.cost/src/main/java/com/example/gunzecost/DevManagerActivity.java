@@ -1,8 +1,10 @@
 package com.example.gunzecost;
 
 import android.app.AlertDialog;
+import android.app.DialogFragment;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -14,6 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.Receivers.BroadcastReceiver;
+import com.dialog.DateDialog;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.listAdapter.MyAdapter;
@@ -46,6 +49,7 @@ public class DevManagerActivity extends AppCompatActivity {
         registerReceiver(barcodeReceiver, filter);
         // 注册控件
         txtDepart = findViewById(R.id.txtDepart);
+        txtDate=findViewById(R.id.txtDate);
         ListView listDev = findViewById(R.id.lv_dev);
 
 
@@ -77,6 +81,8 @@ public class DevManagerActivity extends AppCompatActivity {
         findViewById(R.id.txtDate).setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+                showDatePickerFragemnt();
+                /*
                 //创建弹窗list
                 AlertDialog.Builder builder = new AlertDialog.Builder(DevManagerActivity.this);
                 View view = View.inflate(DevManagerActivity.this, R.layout.datapicker, null);
@@ -90,6 +96,7 @@ public class DevManagerActivity extends AppCompatActivity {
 
                 final AlertDialog dialog = builder.show();
                 dialog.show();
+                */
                 return true;
             }
         });
@@ -113,6 +120,16 @@ public class DevManagerActivity extends AppCompatActivity {
     }
 
 
+    private void showDatePickerFragemnt() {
+
+
+        DialogFragment fragment = new DateDialog();
+        fragment.show(getFragmentManager(), "datePicker");
+
+    }
+    /**
+     * 从服务器获取部门信息填充到弹出框
+     */
     private void ShowDepartment() {
         HttpUtil.sendHttpRequest("GetDepart", new HttpUtil.HttpCallbackListener() {
             @Override
@@ -171,5 +188,11 @@ public class DevManagerActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * 查询设备，优先查询数据库，没有再到服务器查询
+     */
+    private void QueryDevice() {
+
+    }
 
 }

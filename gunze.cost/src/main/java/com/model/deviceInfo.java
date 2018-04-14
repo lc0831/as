@@ -5,16 +5,20 @@ package com.model;
  */
 
 public class deviceInfo {
+    private Integer id;
     private String devID;
     private String devname;
+    //表名
+    public static final String TABLE = "devices";
 
-    public deviceInfo() {
-    }
+    //表的各域名
+    public static final String KEY_ID="id";
+    public static final String KEY_CODE = "devID";
+    public static final String KEY_NAME = "devname";
 
-    public deviceInfo(String devID, String devname) {
-        this.devID = devID;
-        this.devname = devname;
-    }
+
+
+
 
     public String getDevID() {
         return devID;
@@ -30,5 +34,13 @@ public class deviceInfo {
 
     public void setDevname(String devname) {
         this.devname = devname;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 }

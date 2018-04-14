@@ -22,7 +22,7 @@ public class BroadcastReceiver extends android.content.BroadcastReceiver {
      * 定义一个接口
      */
     public interface Message {
-        public void getMsg(String str);
+        void getMsg(String str);
     }
     /**
      *提供公共的方法,并且初始化接口类型的数据
