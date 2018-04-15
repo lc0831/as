@@ -18,7 +18,13 @@ public class CostDB {
         DBHelper dbHelper = new DBHelper(context);
         db = dbHelper.getWritableDatabase();
     }
+    private static CostDB costDB;
+public synchronized static CostDB getInstance(Context context){
+        if(costDB==null)
+            costDB=new CostDB(context);
+        return  costDB;
 
+}
     /**
      * 新增部门
      * @param depart 部门

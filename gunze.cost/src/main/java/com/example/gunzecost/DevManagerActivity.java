@@ -1,10 +1,9 @@
 package com.example.gunzecost;
 
 import android.app.AlertDialog;
-import android.app.DialogFragment;
+import android.app.DatePickerDialog;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -12,18 +11,20 @@ import android.widget.AdapterView;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.Receivers.BroadcastReceiver;
-import com.dialog.DateDialog;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.listAdapter.MyAdapter;
 import com.model.department;
 import com.model.deviceInfo;
+import com.sqlHelper.CostDB;
+import com.sqlHelper.DBHelper;
 import com.sqlHelper.HttpUtil;
 
+import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -32,12 +33,15 @@ import java.util.List;
 public class DevManagerActivity extends AppCompatActivity {
 
     private EditText txtDepart, txtDate;
+    private ProgressBar progressBar;
     private MyAdapter<deviceInfo> devAdapter = null;
     private ArrayList<deviceInfo> devData = new ArrayList<>();
-
     private ArrayList<department> departData = new ArrayList<>();
     BroadcastReceiver barcodeReceiver = new BroadcastReceiver();
-
+    private int mYear, mMonth, mDay;
+    private CostDB costDB;
+    private deviceInfo deviceInfo;
+    private department department;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,13 +53,20 @@ public class DevManagerActivity extends AppCompatActivity {
         registerReceiver(barcodeReceiver, filter);
         // 注册控件
         txtDepart = findViewById(R.id.txtDepart);
-        txtDate=findViewById(R.id.txtDate);
+        txtDate = findViewById(R.id.txtDate);
+        progressBar = findViewById(R.id.progressBar);
         ListView listDev = findViewById(R.id.lv_dev);
-
+        //注册DBHelper
+        costDB = CostDB.getInstance(this);
+        //获取日期
+        Calendar ca = Calendar.getInstance();
+        mYear = ca.get(Calendar.YEAR);
+        mMonth = ca.get(Calendar.MONTH);
+        mDay = ca.get(Calendar.DAY_OF_MONTH);
 
         //填充适配器
         //设备
-        devAdapter = new MyAdapter<deviceInfo>(devData, R.layout.list_view) {
+        devAdapter = new MyAdapter<deviceInfo>(devData, R.layout.listview_device) {
             @Override
             public void bindView(ViewHolder holder, deviceInfo obj) {
                 holder.setText(R.id.item_code, obj.getDevID());
@@ -75,40 +86,30 @@ public class DevManagerActivity extends AppCompatActivity {
                 }
                 return true;
             }
-
         });
         //选择日期
         findViewById(R.id.txtDate).setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                showDatePickerFragemnt();
-                /*
-                //创建弹窗list
-                AlertDialog.Builder builder = new AlertDialog.Builder(DevManagerActivity.this);
-                View view = View.inflate(DevManagerActivity.this, R.layout.datapicker, null);
-                final DatePicker datePicker = view.findViewById(R.id.date_picker);
-                //构建弹窗显示
-                builder.setView(view);
-
-                Calendar cal = Calendar.getInstance();
-                cal.setTimeInMillis(System.currentTimeMillis());
-                datePicker.init(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH), null);
-
-                final AlertDialog dialog = builder.show();
-                dialog.show();
-                */
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    new DatePickerDialog(DevManagerActivity.this, onDateSetListener, mYear, mMonth, mDay).show();
+                }
                 return true;
             }
         });
+        //接收条码信息
         barcodeReceiver.setMessage(new BroadcastReceiver.Message() {
             @Override
             public void getMsg(String str) {
-                //Adapter初始化
-                deviceInfo devInfo = new deviceInfo();
-                devInfo.setDevID(str);
-                devInfo.setDevname(str);
-                devData.add(devInfo);
-                devAdapter.notifyDataSetChanged();
+                if (txtDate.getText() == null || txtDepart.getText() == null) {
+                    Toast.makeText(DevManagerActivity.this, "请先选择部门和日期", Toast.LENGTH_SHORT).show();
+                } else {
+
+
+                    devData.add(deviceInfo);
+                    devAdapter.notifyDataSetChanged();
+
+                }
             }
         });
     }
@@ -119,18 +120,46 @@ public class DevManagerActivity extends AppCompatActivity {
         unregisterReceiver(barcodeReceiver);     //注销广播接收器
     }
 
+    /**
+     * 日期选择器对话框监听
+     */
+    private DatePickerDialog.OnDateSetListener onDateSetListener = new DatePickerDialog.OnDateSetListener() {
 
-    private void showDatePickerFragemnt() {
+        @Override
+        public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+            mYear = year;
+            mMonth = monthOfYear;
+            mDay = dayOfMonth;
+            String days;
+            if (mMonth + 1 < 10) {
+                if (mDay < 10) {
+                    days = new StringBuffer().append(mYear).append("-").append("0").
+                            append(mMonth + 1).append("-").append("0").append(mDay).toString();
+                } else {
+                    days = new StringBuffer().append(mYear).append("-").append("0").
+                            append(mMonth + 1).append("-").append(mDay).toString();
+                }
+
+            } else {
+                if (mDay < 10) {
+                    days = new StringBuffer().append(mYear).append("-").
+                            append(mMonth + 1).append("-").append("0").append(mDay).toString();
+                } else {
+                    days = new StringBuffer().append(mYear).append("-").
+                            append(mMonth + 1).append("-").append(mDay).toString();
+                }
+
+            }
+            txtDate.setText(days);
+        }
+    };
 
 
-        DialogFragment fragment = new DateDialog();
-        fragment.show(getFragmentManager(), "datePicker");
-
-    }
     /**
      * 从服务器获取部门信息填充到弹出框
      */
     private void ShowDepartment() {
+        showProgressBar();
         HttpUtil.sendHttpRequest("GetDepart", new HttpUtil.HttpCallbackListener() {
             @Override
             public void onFinish(String response) {
@@ -143,7 +172,7 @@ public class DevManagerActivity extends AppCompatActivity {
                         departData = gson.fromJson(_response, new TypeToken<List<department>>() {
                         }.getType());
                         if (departData.size() > 0) {
-                            MyAdapter<department> departAdapter = new MyAdapter<department>(departData, R.layout.list_view) {
+                            MyAdapter<department> departAdapter = new MyAdapter<department>(departData, R.layout.listview_department) {
                                 @Override
                                 public void bindView(ViewHolder holder, department obj) {
                                     holder.setText(R.id.item_code, obj.getcDepCode());
@@ -158,18 +187,18 @@ public class DevManagerActivity extends AppCompatActivity {
                             AlertDialog.Builder builder = new AlertDialog.Builder(DevManagerActivity.this);
                             builder.setView(dialogView);
                             final AlertDialog dialog = builder.show();
-
+                            showProgressBar();
                             listDepart.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                                 @Override
                                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                                    View curr = parent.getChildAt((int) id);
-                                    TextView c = curr.findViewById(R.id.item_Name);
-                                    txtDepart.setText(c.getText());
+
+//                                    View curr = parent.getChildAt(position);
+//                                    txtItemName = curr.findViewById(R.id.item_Name);
+                                    txtDepart.setText(departData.get(position).getcDepName());
                                     dialog.dismiss();
                                 }
                             });
                         }
-
                     }
                 });
             }
@@ -188,11 +217,56 @@ public class DevManagerActivity extends AppCompatActivity {
 
     }
 
+    private void showProgressBar() {
+        if (progressBar.getVisibility() == View.GONE)
+            progressBar.setVisibility(View.VISIBLE);
+        else
+            progressBar.setVisibility(View.GONE);
+    }
+
     /**
      * 查询设备，优先查询数据库，没有再到服务器查询
      */
-    private void QueryDevice() {
+    private void QueryDevice(String strBarcode) {
 
+        deviceInfo = costDB.getDeviceById(strBarcode);
+        if (deviceInfo.getDevID() == null) {
+            queryFromServer("","device");
+        }
+    }
+
+    private void queryFromServer(final String code, final String type) {
+        showProgressBar();
+        HttpUtil.sendHttpRequest(code, new HttpUtil.HttpCallbackListener() {
+            @Override
+            public void onFinish(String response) {
+
+                if ("device".equals(type)) {
+                    Gson gson = new Gson();
+                    deviceInfo = gson.fromJson(response, new TypeToken<deviceInfo>() {
+                    }.getType());
+                    costDB.insertDevice(deviceInfo);
+                }
+                if ("department".equals(type)) {
+                    Gson gson = new Gson();
+                    department = gson.fromJson(response, new TypeToken<department>() {
+                    }.getType());
+                    costDB.insertDepart(department);
+                }
+                showProgressBar();
+            }
+
+            @Override
+            public void onError(Exception e) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        showProgressBar();
+                        Toast.makeText(DevManagerActivity.this, "加载失败", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        });
     }
 
 }

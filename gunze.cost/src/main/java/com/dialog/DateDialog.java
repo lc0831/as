@@ -13,9 +13,6 @@ public class DateDialog extends DialogFragment implements
         DatePickerDialog.OnDateSetListener {
     private DateListener dateListener;
 
-    public DateDialog newInstance(DateListener dateListener) {
-
-    }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
