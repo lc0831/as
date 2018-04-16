@@ -8,14 +8,14 @@ import java.net.URL;
 
 public class HttpUtil {
     public static void sendHttpRequest(final String function,
-                                       final HttpCallbackListener listener) {
+                                       final HttpCallbackListener listener,final String strParam) {
         new Thread(new Runnable() {
             @Override
             public void run() {
                 HttpURLConnection connection = null;
                 try {
                     String address="http://192.168.3.164:6666/api/transfer/";
-                    URL url = new URL(address+function);
+                    URL url = new URL(address+function+"?"+strParam);
                     connection = (HttpURLConnection) url.openConnection();
                     connection.setRequestMethod("GET");
                     connection.setConnectTimeout(8000);
@@ -48,4 +48,5 @@ public class HttpUtil {
         void onFinish(String response);
         void onError(Exception e);
     }
+
 }

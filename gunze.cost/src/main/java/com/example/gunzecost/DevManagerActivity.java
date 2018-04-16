@@ -3,6 +3,7 @@ package com.example.gunzecost;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.IntentFilter;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
@@ -15,6 +16,7 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.Receivers.BroadcastReceiver;
+import com.common.commonHelper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.listAdapter.MyAdapter;
@@ -24,9 +26,14 @@ import com.sqlHelper.CostDB;
 import com.sqlHelper.DBHelper;
 import com.sqlHelper.HttpUtil;
 
+import org.litepal.LitePal;
+import org.litepal.crud.DataSupport;
+import org.litepal.tablemanager.Connector;
+
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 
@@ -39,7 +46,7 @@ public class DevManagerActivity extends AppCompatActivity {
     private ArrayList<department> departData = new ArrayList<>();
     BroadcastReceiver barcodeReceiver = new BroadcastReceiver();
     private int mYear, mMonth, mDay;
-    private CostDB costDB;
+    //private CostDB costDB;
     private deviceInfo deviceInfo;
     private department department;
 
@@ -57,7 +64,9 @@ public class DevManagerActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progressBar);
         ListView listDev = findViewById(R.id.lv_dev);
         //注册DBHelper
-        costDB = CostDB.getInstance(this);
+        //costDB = CostDB.getInstance(this);
+
+        LitePal.getDatabase();
         //获取日期
         Calendar ca = Calendar.getInstance();
         mYear = ca.get(Calendar.YEAR);
@@ -101,14 +110,10 @@ public class DevManagerActivity extends AppCompatActivity {
         barcodeReceiver.setMessage(new BroadcastReceiver.Message() {
             @Override
             public void getMsg(String str) {
-                if (txtDate.getText() == null || txtDepart.getText() == null) {
+                if (txtDate.getText().toString().trim().equals("") || txtDepart.getText().toString().trim().equals("")) {
                     Toast.makeText(DevManagerActivity.this, "请先选择部门和日期", Toast.LENGTH_SHORT).show();
                 } else {
-
-
-                    devData.add(deviceInfo);
-                    devAdapter.notifyDataSetChanged();
-
+                    QueryDevice(str);
                 }
             }
         });
@@ -194,7 +199,8 @@ public class DevManagerActivity extends AppCompatActivity {
 
 //                                    View curr = parent.getChildAt(position);
 //                                    txtItemName = curr.findViewById(R.id.item_Name);
-                                    txtDepart.setText(departData.get(position).getcDepName());
+                                    department=departData.get(position);
+                                    txtDepart.setText(department.getcDepName());
                                     dialog.dismiss();
                                 }
                             });
@@ -212,7 +218,7 @@ public class DevManagerActivity extends AppCompatActivity {
                     }
                 });
             }
-        });
+        }, "");
 
 
     }
@@ -224,18 +230,22 @@ public class DevManagerActivity extends AppCompatActivity {
             progressBar.setVisibility(View.GONE);
     }
 
+
     /**
      * 查询设备，优先查询数据库，没有再到服务器查询
      */
     private void QueryDevice(String strBarcode) {
-
-        deviceInfo = costDB.getDeviceById(strBarcode);
-        if (deviceInfo.getDevID() == null) {
-            queryFromServer("","device");
+        deviceInfo= DataSupport.where("devID=?",strBarcode).findFirst(deviceInfo.class);
+        //deviceInfo = costDB.getDeviceById(strBarcode);
+        if (deviceInfo == null) {
+            queryFromServer("GetDeviceByID", "device", "strID=" + strBarcode);
+        } else {
+            devData.add(deviceInfo);
+            devAdapter.notifyDataSetChanged();
         }
     }
 
-    private void queryFromServer(final String code, final String type) {
+    private void queryFromServer(final String code, final String type, final String strParams) {
         showProgressBar();
         HttpUtil.sendHttpRequest(code, new HttpUtil.HttpCallbackListener() {
             @Override
@@ -245,15 +255,25 @@ public class DevManagerActivity extends AppCompatActivity {
                     Gson gson = new Gson();
                     deviceInfo = gson.fromJson(response, new TypeToken<deviceInfo>() {
                     }.getType());
-                    costDB.insertDevice(deviceInfo);
                 }
-                if ("department".equals(type)) {
-                    Gson gson = new Gson();
-                    department = gson.fromJson(response, new TypeToken<department>() {
-                    }.getType());
-                    costDB.insertDepart(department);
+                if (deviceInfo != null) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            showProgressBar();
+                            deviceInfo.setDepcode(department.cDepCode);
+                            deviceInfo.setDepName(department.cDepName);
+                            deviceInfo.setRecordDate(commonHelper.string2Date(txtDate.getText().toString()));
+                            deviceInfo.save();
+                            //costDB.insertDevice(deviceInfo);
+                            devData.add(deviceInfo);
+                            devAdapter.notifyDataSetChanged();
+                        }
+                    });
                 }
-                showProgressBar();
+
+
+                //showProgressBar();
             }
 
             @Override
@@ -266,7 +286,7 @@ public class DevManagerActivity extends AppCompatActivity {
                     }
                 });
             }
-        });
+        }, strParams);
     }
 
 }

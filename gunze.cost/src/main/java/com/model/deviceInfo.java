@@ -1,23 +1,29 @@
 package com.model;
 
+import net.sourceforge.jtds.jdbc.DateTime;
+
+import org.litepal.crud.DataSupport;
+
+import java.util.Date;
+
 /**
  * Created by 刘畅 on 2018/3/25.
  */
 
-public class deviceInfo {
+public class deviceInfo extends DataSupport {
     private Integer id;
     private String devID;
-    private String devname;
+    private String devName;
+    private String depCode;
+    private String depName;
+    private Date recordDate;
     //表名
     public static final String TABLE = "devices";
 
     //表的各域名
-    public static final String KEY_ID="id";
+    public static final String KEY_ID = "id";
     public static final String KEY_CODE = "devID";
     public static final String KEY_NAME = "devname";
-
-
-
 
 
     public String getDevID() {
@@ -29,11 +35,11 @@ public class deviceInfo {
     }
 
     public String getDevname() {
-        return devname;
+        return devName;
     }
 
     public void setDevname(String devname) {
-        this.devname = devname;
+        this.devName = devname;
     }
 
     public Integer getId() {
@@ -42,5 +48,29 @@ public class deviceInfo {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public String getDepName() {
+        return depName;
+    }
+
+    public void setDepName(String depName) {
+        this.depName = depName;
+    }
+
+    public Date getRecordDate() {
+        return recordDate;
+    }
+
+    public void setRecordDate(Date recordDate) {
+        this.recordDate = recordDate;
+    }
+
+    public String getDepcode() {
+        return depCode;
+    }
+
+    public void setDepcode(String depcode) {
+        this.depCode = depcode;
     }
 }

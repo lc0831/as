@@ -35,7 +35,7 @@ public synchronized static CostDB getInstance(Context context){
             values.put(department.KEY_CODE, depart.cDepCode);
             values.put(department.KEY_NAME, depart.cDepName);
             db.insert(department.TABLE, null, values);
-            db.close();
+
         }
     }
     public void insertDevice(deviceInfo device){
@@ -44,7 +44,7 @@ public synchronized static CostDB getInstance(Context context){
             values.put(deviceInfo.KEY_CODE,device.getDevID());
             values.put(deviceInfo.KEY_NAME,device.getDevname());
             db.insert(deviceInfo.TABLE,null,values);
-            db.close();
+
         }
     }
     public List<department> getDepartList(){
@@ -64,7 +64,7 @@ public synchronized static CostDB getInstance(Context context){
             }while(cursor.moveToNext());
         }
         cursor.close();
-        db.close();
+
         return departList;
     }
 
@@ -86,7 +86,7 @@ public synchronized static CostDB getInstance(Context context){
             }while(cursor.moveToNext());
         }
         cursor.close();
-        db.close();
+
         return depart;
     } public List<deviceInfo> getDeviceList(){
 
@@ -105,7 +105,7 @@ public synchronized static CostDB getInstance(Context context){
             }while(cursor.moveToNext());
         }
         cursor.close();
-        db.close();
+
         return deviceList;
     }
 
@@ -127,7 +127,7 @@ public synchronized static CostDB getInstance(Context context){
             }while(cursor.moveToNext());
         }
         cursor.close();
-        db.close();
+
         return device;
     }
 

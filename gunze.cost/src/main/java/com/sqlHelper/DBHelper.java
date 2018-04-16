@@ -13,7 +13,7 @@ import com.model.deviceInfo;
 
 public class DBHelper extends SQLiteOpenHelper {
     //数据库版本号
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 3;
     //数据库名称
     private static final String DATABASE_NAME = "cost.db";
     /**

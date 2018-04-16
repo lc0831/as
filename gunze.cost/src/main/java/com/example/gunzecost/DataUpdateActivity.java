@@ -61,8 +61,7 @@ public class DataUpdateActivity extends AppCompatActivity implements View.OnClic
             public void onError(Exception e) {
 
             }
-        });
-
+        },"");
     }
 
     private void showProgressDialog() {
