@@ -2,6 +2,7 @@ package com.example.gunzecost;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.content.DialogInterface;
 import android.content.IntentFilter;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -49,6 +50,9 @@ public class DevManagerActivity extends AppCompatActivity {
     //private CostDB costDB;
     private deviceInfo deviceInfo;
     private department department;
+    private Date dateToday;
+    private int duplicateIndex;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +76,10 @@ public class DevManagerActivity extends AppCompatActivity {
         mYear = ca.get(Calendar.YEAR);
         mMonth = ca.get(Calendar.MONTH);
         mDay = ca.get(Calendar.DAY_OF_MONTH);
+        dateToday = commonHelper.string2Date(commonHelper.date2String(new Date()));
 
+        //初始化
+        InitData();
         //填充适配器
         //设备
         devAdapter = new MyAdapter<deviceInfo>(devData, R.layout.listview_device) {
@@ -125,6 +132,33 @@ public class DevManagerActivity extends AppCompatActivity {
         unregisterReceiver(barcodeReceiver);     //注销广播接收器
     }
 
+    private void InitData() {
+        //初始化
+        //首先查找数据库中是否有设备登记记录
+        deviceInfo device = DataSupport.order("recordDate desc").findFirst(deviceInfo.class);
+        if (device != null) {
+            //如果有记录，查找最后一天登记的信息
+            List<deviceInfo> devices = DataSupport.where("recordDate=? and depCode=?",
+                    String.valueOf(device.getRecordDate().getTime()), device.getDepcode()).find(deviceInfo.class);
+            /**
+             //如果是当天信息，则直接显示，否则新增当天信息
+
+             if (device.getRecordDate().getTime() != dateToday.getTime()) {
+             for (int i = 0; i < devices.size(); i++) {
+             devices.get(i).setRecordDate(new Date());
+             }
+             DataSupport.saveAll(devices);
+             }
+             */
+            department = new department();
+            department.setcDepCode(device.getDepcode());
+            department.setcDepName(device.getDepName());
+            txtDepart.setText(device.getDepName());
+            txtDate.setText(commonHelper.date2String(devices.get(0).getRecordDate()));
+            devData = (ArrayList<com.model.deviceInfo>) devices;
+        }
+    }
+
     /**
      * 日期选择器对话框监听
      */
@@ -156,6 +190,21 @@ public class DevManagerActivity extends AppCompatActivity {
 
             }
             txtDate.setText(days);
+            //更换日期改变
+            if (!txtDepart.getText().toString().trim().equals("") &&
+                    !txtDate.getText().toString().trim().equals("")) {
+                List<deviceInfo> devices = DataSupport.where("recordDate=? and depCode=?",
+                        String.valueOf(commonHelper.string2Date(days.trim()).getTime()),
+                        department.getcDepCode()).find(deviceInfo.class);
+                //如果数据库没有选定日期数据，插入
+                if (devices.size() == 0) {
+                    devData.clear();
+                } else {
+                    devData.clear();
+                    devData.addAll(devices);
+                }
+                devAdapter.notifyDataSetChanged();
+            }
         }
     };
 
@@ -199,7 +248,7 @@ public class DevManagerActivity extends AppCompatActivity {
 
 //                                    View curr = parent.getChildAt(position);
 //                                    txtItemName = curr.findViewById(R.id.item_Name);
-                                    department=departData.get(position);
+                                    department = departData.get(position);
                                     txtDepart.setText(department.getcDepName());
                                     dialog.dismiss();
                                 }
@@ -235,13 +284,55 @@ public class DevManagerActivity extends AppCompatActivity {
      * 查询设备，优先查询数据库，没有再到服务器查询
      */
     private void QueryDevice(String strBarcode) {
-        deviceInfo= DataSupport.where("devID=?",strBarcode).findFirst(deviceInfo.class);
+        final deviceInfo devInfo = DataSupport.where("devID=?", strBarcode).findFirst(deviceInfo.class);
         //deviceInfo = costDB.getDeviceById(strBarcode);
-        if (deviceInfo == null) {
+        if (devInfo == null) {
             queryFromServer("GetDeviceByID", "device", "strID=" + strBarcode);
         } else {
-            devData.add(deviceInfo);
-            devAdapter.notifyDataSetChanged();
+            deviceInfo devTemp = null;
+            //扫码时如果当天已登记设备
+            for (int i = 0; i < devData.size(); i++) {
+                if (devData.get(i).getDevID().equals(devInfo.getDevID())) {
+                    duplicateIndex = i;
+                    devTemp = devData.get(duplicateIndex);
+
+                    //提示框，是否删除
+                    AlertDialog.Builder dialog = new AlertDialog.Builder(DevManagerActivity.this);
+                    dialog.setTitle("提示");
+                    dialog.setMessage("是否取消登记此设备？");
+                    dialog.setCancelable(false);
+                    dialog.setPositiveButton("删除", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            devData.remove(duplicateIndex);
+                            devInfo.delete();
+                            devAdapter.notifyDataSetChanged();
+                        }
+                    });
+                    dialog.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    });
+                    dialog.show();
+
+                    break;
+                }
+            }
+            //没有重复的，插入
+            if (devTemp == null) {
+                deviceInfo.setDevID(devInfo.getDevID());
+                deviceInfo.setDevname(devInfo.getDevname());
+                deviceInfo.setDepcode(department.cDepCode);
+                deviceInfo.setDepName(department.cDepName);
+                deviceInfo.setRecordDate(commonHelper.string2Date(txtDate.getText().toString()));
+                deviceInfo.save();
+                devData.add(deviceInfo);
+                devAdapter.notifyDataSetChanged();
+            }
+
+
         }
     }
 
