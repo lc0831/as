@@ -140,16 +140,16 @@ public class DevManagerActivity extends AppCompatActivity {
             //如果有记录，查找最后一天登记的信息
             List<deviceInfo> devices = DataSupport.where("recordDate=? and depCode=?",
                     String.valueOf(device.getRecordDate().getTime()), device.getDepcode()).find(deviceInfo.class);
-            /**
-             //如果是当天信息，则直接显示，否则新增当天信息
 
-             if (device.getRecordDate().getTime() != dateToday.getTime()) {
-             for (int i = 0; i < devices.size(); i++) {
-             devices.get(i).setRecordDate(new Date());
-             }
-             DataSupport.saveAll(devices);
-             }
-             */
+            //如果是当天信息，则直接显示，否则新增当天信息
+
+            if (device.getRecordDate().getTime() != dateToday.getTime()) {
+                for (int i = 0; i < devices.size(); i++) {
+                    devices.get(i).setRecordDate(dateToday);
+                }
+                DataSupport.saveAll(devices);
+            }
+
             department = new department();
             department.setcDepCode(device.getDepcode());
             department.setcDepName(device.getDepName());
@@ -196,7 +196,7 @@ public class DevManagerActivity extends AppCompatActivity {
                 List<deviceInfo> devices = DataSupport.where("recordDate=? and depCode=?",
                         String.valueOf(commonHelper.string2Date(days.trim()).getTime()),
                         department.getcDepCode()).find(deviceInfo.class);
-                //如果数据库没有选定日期数据，插入
+                //如果数据库没有选定日期数据，显示空，有添加
                 if (devices.size() == 0) {
                     devData.clear();
                 } else {
@@ -304,8 +304,10 @@ public class DevManagerActivity extends AppCompatActivity {
                     dialog.setPositiveButton("删除", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
+
+                            devData.get(duplicateIndex).delete();
                             devData.remove(duplicateIndex);
-                            devInfo.delete();
+
                             devAdapter.notifyDataSetChanged();
                         }
                     });
@@ -322,6 +324,7 @@ public class DevManagerActivity extends AppCompatActivity {
             }
             //没有重复的，插入
             if (devTemp == null) {
+                deviceInfo=new deviceInfo();
                 deviceInfo.setDevID(devInfo.getDevID());
                 deviceInfo.setDevname(devInfo.getDevname());
                 deviceInfo.setDepcode(department.cDepCode);

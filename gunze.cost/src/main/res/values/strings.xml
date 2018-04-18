@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">GUNZE.COST</string>
+    <string name="list_itemCode">项目编码</string>
+    <string name="list_itemName">项目名称</string>
 </resources>

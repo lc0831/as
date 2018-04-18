@@ -17,12 +17,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".PerRecordActivity" />
-        <activity android:name=".PerManagerActivity" />
-        <activity android:name=".DevManagerActivity"
-            android:label="设备管理"/>
-        <activity android:name=".DataUpdateActivity"
-            android:label="数据管理"></activity>
+        <activity android:name=".PerRecordActivity" android:label="员工登记"/>
+        <activity android:name=".PerManagerActivity" android:label="员工调动"/>
+        <activity android:name=".DevManagerActivity" android:label="设备管理"/>
+        <activity android:name=".DataUpdateActivity" android:label="数据管理"/>
     </application>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
