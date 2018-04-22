@@ -23,6 +23,7 @@ import com.google.gson.reflect.TypeToken;
 import com.listAdapter.MyAdapter;
 import com.model.department;
 import com.model.deviceInfo;
+import com.model.personRecord;
 import com.sqlHelper.CostDB;
 import com.sqlHelper.DBHelper;
 import com.sqlHelper.HttpUtil;
@@ -191,20 +192,7 @@ public class DevManagerActivity extends AppCompatActivity {
             }
             txtDate.setText(days);
             //更换日期改变
-            if (!txtDepart.getText().toString().trim().equals("") &&
-                    !txtDate.getText().toString().trim().equals("")) {
-                List<deviceInfo> devices = DataSupport.where("recordDate=? and depCode=?",
-                        String.valueOf(commonHelper.string2Date(days.trim()).getTime()),
-                        department.getcDepCode()).find(deviceInfo.class);
-                //如果数据库没有选定日期数据，显示空，有添加
-                if (devices.size() == 0) {
-                    devData.clear();
-                } else {
-                    devData.clear();
-                    devData.addAll(devices);
-                }
-                devAdapter.notifyDataSetChanged();
-            }
+            LoadData();
         }
     };
 
@@ -250,6 +238,7 @@ public class DevManagerActivity extends AppCompatActivity {
 //                                    txtItemName = curr.findViewById(R.id.item_Name);
                                     department = departData.get(position);
                                     txtDepart.setText(department.getcDepName());
+                                    LoadData();
                                     dialog.dismiss();
                                 }
                             });
@@ -271,7 +260,22 @@ public class DevManagerActivity extends AppCompatActivity {
 
 
     }
-
+private void LoadData(){
+    String strDepart = txtDepart.getText().toString().trim();
+    String strDate = txtDate.getText().toString().trim();
+    if (!strDepart.equals("") &&!strDate.equals("")) {
+        List<deviceInfo> devices = DataSupport.where("recordDate=? and depCode=?",
+                String.valueOf(commonHelper.string2Date(strDate).getTime()), department.getcDepCode()).find(deviceInfo.class);
+        //如果数据库没有选定日期数据，显示空，有添加
+        if (devices.size() == 0) {
+            devData.clear();
+        } else {
+            devData.clear();
+            devData.addAll(devices);
+        }
+        devAdapter.notifyDataSetChanged();
+    }
+}
     private void showProgressBar() {
         if (progressBar.getVisibility() == View.GONE)
             progressBar.setVisibility(View.VISIBLE);
@@ -324,7 +328,7 @@ public class DevManagerActivity extends AppCompatActivity {
             }
             //没有重复的，插入
             if (devTemp == null) {
-                deviceInfo=new deviceInfo();
+                deviceInfo = new deviceInfo();
                 deviceInfo.setDevID(devInfo.getDevID());
                 deviceInfo.setDevname(devInfo.getDevname());
                 deviceInfo.setDepcode(department.cDepCode);
@@ -354,7 +358,7 @@ public class DevManagerActivity extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            showProgressBar();
+
                             deviceInfo.setDepcode(department.cDepCode);
                             deviceInfo.setDepName(department.cDepName);
                             deviceInfo.setRecordDate(commonHelper.string2Date(txtDate.getText().toString()));
@@ -364,10 +368,10 @@ public class DevManagerActivity extends AppCompatActivity {
                             devAdapter.notifyDataSetChanged();
                         }
                     });
+                } else {
+                    Toast.makeText(DevManagerActivity.this, "未查到此人", Toast.LENGTH_SHORT).show();
                 }
-
-
-                //showProgressBar();
+                showProgressBar();
             }
 
             @Override
