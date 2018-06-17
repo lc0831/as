@@ -2,4 +2,10 @@
     <string name="app_name">GUNZE.COST</string>
     <string name="list_itemCode">项目编码</string>
     <string name="list_itemName">项目名称</string>
+    <string name="list_workHourTitle">工作时间</string>
+    <string name="list_workHourContext">小时数</string>
+    <string name="title_activity_main2">Main2Activity</string>
+    <string name="title_home">设备</string>
+    <string name="title_dashboard">人员</string>
+    <string name="title_notifications">维护</string>
 </resources>

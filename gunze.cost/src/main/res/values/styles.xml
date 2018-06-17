@@ -8,18 +8,23 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="AppTheme.NoActionBarWithBackGround">
+        <item name="windowActionBar">false</item>//取消Actionbar
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>//设置全屏
+    </style>
     <style name="buttonStyle">
         <item name="android:textSize">40px</item>
         <item name="android:textColor">#fff</item>
-       <item name="android:background">@drawable/custmainbottom</item>
+        <item name="android:background">@drawable/custmainbottom</item>
     </style>
+
     <style name="textStyle">
         <item name="android:textSize">20dp</item>
         <item name="android:textAlignment">center</item>
         <item name="android:layout_margin">10dp</item>
         <item name="android:padding">10dp</item>
     </style>
-
 
 
 </resources>

@@ -2,6 +2,7 @@ package com.example.gunzecost;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.content.IntentFilter;
 import android.support.v7.app.AppCompatActivity;
@@ -14,6 +15,7 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.Receivers.BroadcastReceiver;
@@ -48,7 +50,7 @@ public class PerRecordActivity extends AppCompatActivity {
     private ListView listPerson, listDepart;
     private int mYear, mMonth, mDay;
     private Date dateToday;
-    private int duplicateIndex;
+    private int duplicateIndex,personItemPosition;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +78,7 @@ public class PerRecordActivity extends AppCompatActivity {
         mYear = ca.get(Calendar.YEAR);
         mMonth = ca.get(Calendar.MONTH);
         mDay = ca.get(Calendar.DAY_OF_MONTH);
+
         dateToday = commonHelper.string2Date(commonHelper.date2String(new Date()));
         txtDate.setText(commonHelper.date2String(new Date()));
         //填充适配器
@@ -83,8 +86,9 @@ public class PerRecordActivity extends AppCompatActivity {
         personAdapter = new MyAdapter<personRecord>(personData, R.layout.listview_person) {
             @Override
             public void bindView(ViewHolder holder, personRecord obj) {
-                holder.setText(R.id.item_code, obj.getPerCode());
-                holder.setText(R.id.item_Name, obj.getPerName());
+                holder.setText(R.id.item_perCode, obj.getPerCode());
+                holder.setText(R.id.item_perName, obj.getPerName());
+                holder.setText(R.id.item_workHour,obj.getWorkHour());
             }
         };
 
@@ -105,7 +109,7 @@ public class PerRecordActivity extends AppCompatActivity {
             public boolean onTouch(View v, MotionEvent event) {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
                     //填充弹窗数据
-                    queryFromServer("GetDepart", "department", null);
+                    ShowDepartment();
 
                 }
                 return true;
@@ -119,6 +123,15 @@ public class PerRecordActivity extends AppCompatActivity {
                     new DatePickerDialog(PerRecordActivity.this, onDateSetListener, mYear, mMonth, mDay).show();
                 }
                 return true;
+            }
+        });
+        //点击人员列表设置工时
+        listPerson.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                personRecord = personData.get(position);
+                personItemPosition=position;
+                new TimePickerDialog(PerRecordActivity.this, 2, onTimeSetListener, 0, 0, true).show();
             }
         });
         //接收条码信息
@@ -139,6 +152,15 @@ public class PerRecordActivity extends AppCompatActivity {
         });
     }
 
+    private TimePickerDialog.OnTimeSetListener onTimeSetListener = new TimePickerDialog.OnTimeSetListener() {
+        @Override
+        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+            personRecord.setWorkHour(String.valueOf(hourOfDay) +"."+ String.valueOf(minute));
+            personRecord.save();
+            personData.set(personItemPosition,personRecord);
+            personAdapter.notifyDataSetChanged();
+        }
+    };
     /**
      * 日期选择器对话框监听
      */
@@ -179,28 +201,39 @@ public class PerRecordActivity extends AppCompatActivity {
      * 弹出部门弹窗
      */
     private void ShowDepartment() {
+        List<department> dep=DataSupport.findAll(department.class);
+        if(dep.size()<=0){
+            queryFromServer("GetDepart", "department", null);
+        }else{
+            departData.clear();
+            departData.addAll(dep);
+            if (departData.size() > 0) {
 
-        if (departData.size() > 0) {
-            departAdapter.notifyDataSetChanged();
-            //创建部门弹窗
-            ViewGroup parent = (ViewGroup) dialogView.getParent();
-            if (parent != null) {
-                parent.removeAllViews();
-            }
-            AlertDialog.Builder builder = new AlertDialog.Builder(PerRecordActivity.this);
-            builder.setView(dialogView);
-            final AlertDialog dialog = builder.show();
+                departAdapter.notifyDataSetChanged();
 
-            listDepart.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    department = departData.get(position);
-                    txtDepart.setText(department.getcDepName());
-                    InitData();
-                    dialog.dismiss();
+                //创建部门弹窗
+                ViewGroup parent = (ViewGroup) dialogView.getParent();
+                if (parent != null) {
+                    parent.removeAllViews();
                 }
-            });
+                AlertDialog.Builder builder = new AlertDialog.Builder(PerRecordActivity.this);
+                builder.setView(dialogView);
+                final AlertDialog dialog = builder.show();
+
+                listDepart.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        department = departData.get(position);
+                        txtDepart.setText(department.getcDepName());
+                        InitData();
+                        dialog.dismiss();
+                    }
+                });
+            }
         }
+
+
+
     }
 
     /**
@@ -237,6 +270,7 @@ public class PerRecordActivity extends AppCompatActivity {
 
                                 personRecord.setDepCode(department.cDepCode);
                                 personRecord.setDepName(department.cDepName);
+                                personRecord.setWorkHour(String.valueOf(8));
                                 personRecord.setRecordDate(commonHelper.string2Date(txtDate.getText().toString()));
                                 personRecord.save();
                                 personData.add(personRecord);
@@ -252,6 +286,9 @@ public class PerRecordActivity extends AppCompatActivity {
                             }.getType());
                             departData.addAll(departDatas);
                             if (departData != null) {
+                                for (department dep :departData) {
+                                    dep.save();
+                                }
                                 ShowDepartment();
                             } else {
                                 Toast.makeText(PerRecordActivity.this, "未获取到部门", Toast.LENGTH_SHORT).show();
@@ -294,15 +331,13 @@ public class PerRecordActivity extends AppCompatActivity {
                     //提示框，是否删除
                     AlertDialog.Builder dialog = new AlertDialog.Builder(PerRecordActivity.this);
                     dialog.setTitle("提示");
-                    dialog.setMessage("是否取消登记此设备？");
+                    dialog.setMessage("是否取消登记？");
                     dialog.setCancelable(false);
                     dialog.setPositiveButton("删除", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-
                             personData.get(duplicateIndex).delete();
                             personData.remove(duplicateIndex);
-
                             personAdapter.notifyDataSetChanged();
                         }
                     });
@@ -324,6 +359,7 @@ public class PerRecordActivity extends AppCompatActivity {
                 personRecord.setPerName(personInfo.getPerName());
                 personRecord.setDepCode(department.cDepCode);
                 personRecord.setDepName(department.cDepName);
+                personRecord.setWorkHour(String.valueOf(8));
                 personRecord.setRecordDate(commonHelper.string2Date(txtDate.getText().toString()));
                 personRecord.save();
                 personData.add(personRecord);

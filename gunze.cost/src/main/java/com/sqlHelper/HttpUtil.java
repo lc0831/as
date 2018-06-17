@@ -6,6 +6,11 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+
 public class HttpUtil {
     public static void sendHttpRequest(final String function,
                                        final HttpCallbackListener listener,final String strParam) {
@@ -43,6 +48,18 @@ public class HttpUtil {
                 }
             }
         }).start();
+    }
+    public static void sendOkHttpRequest(final String function,String json,okhttp3.Callback callback){
+        String address="http://192.168.3.164:6666/api/transfer/"+function;
+         MediaType JSON
+                = MediaType.parse("application/json; charset=utf-8");
+        OkHttpClient client=new OkHttpClient();
+        RequestBody body = RequestBody.create(JSON, json);
+        Request request=new Request.Builder()
+                .url(address)
+                .post(body)
+                .build();
+        client.newCall(request).enqueue(callback);
     }
     public interface HttpCallbackListener{
         void onFinish(String response);

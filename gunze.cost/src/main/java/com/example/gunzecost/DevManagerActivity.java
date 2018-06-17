@@ -201,6 +201,7 @@ public class DevManagerActivity extends AppCompatActivity {
      * 从服务器获取部门信息填充到弹出框
      */
     private void ShowDepartment() {
+
         showProgressBar();
         HttpUtil.sendHttpRequest("GetDepart", new HttpUtil.HttpCallbackListener() {
             @Override

@@ -1,10 +1,12 @@
 package com.model;
 
+import org.litepal.crud.DataSupport;
+
 /**
  * Created by 刘畅 on 2018/3/25.
  */
 
-public class department {
+public class department extends DataSupport {
     //表名
     public static final String TABLE = "department";
 

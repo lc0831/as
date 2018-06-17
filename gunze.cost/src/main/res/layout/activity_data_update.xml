@@ -6,14 +6,34 @@
     android:layout_height="match_parent"
     tools:context="com.example.gunzecost.DataUpdateActivity"
     android:orientation="vertical">
-    <Button
-    android:id="@+id/btn_updatedepart"
+<LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    style="@style/buttonStyle"
-    android:textSize="12pt"
-    android:text="更新部门"/>
+    android:orientation="horizontal"
+    android:padding="8pt">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="月份"
+        android:textSize="12pt"/>
+    <Spinner
+        android:id="@+id/selectMoth"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
 
+        ></Spinner>
+
+
+</LinearLayout>
+    <Button
+        android:id="@+id/upload"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="上传"
+        android:textSize="12pt"/>
+<FrameLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
     <ProgressBar
         android:id="@+id/progressBar"
         style="?android:attr/progressBarStyleInverse"
@@ -21,7 +41,22 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:visibility="visible"
+        android:visibility="gone"
 
         />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/floatingActionButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:src="@mipmap/ok"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        app:backgroundTint="@color/colorPrimary" />
+
+
+
+</FrameLayout>
+
 </LinearLayout>

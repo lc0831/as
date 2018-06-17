@@ -21,7 +21,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btnPerRecord.setOnClickListener(this);
         btnDevManager = findViewById(R.id.btnDevManager);
         btnDevManager.setOnClickListener(this);
-        btnPerManager = findViewById(R.id.btnPerManager);
+        btnPerManager = findViewById(R.id.btnSys);
         btnPerManager.setOnClickListener(this);
         btnDataUpdate = findViewById(R.id.btnDataUpdate);
         btnDataUpdate.setOnClickListener(this);
@@ -39,8 +39,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 intent=new Intent(this,DevManagerActivity.class);
                 startActivity(intent);
                 break;
-            case R.id.btnPerManager:
-                intent=new Intent(this,PerManagerActivity.class);
+            case R.id.btnSys:
+                intent=new Intent(this,SysOptionActivity.class);
                 startActivity(intent);
                 break;
             case R.id.btnDataUpdate:

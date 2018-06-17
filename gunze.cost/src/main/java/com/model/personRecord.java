@@ -10,6 +10,7 @@ public class personRecord extends DataSupport {
     private String perName;
     private String depCode;
     private String depName;
+    private String workHour;
     private Date recordDate;
 
     public Integer getId() {
@@ -58,5 +59,12 @@ public class personRecord extends DataSupport {
 
     public void setRecordDate(Date recordDate) {
         this.recordDate = recordDate;
+    }
+    public String getWorkHour() {
+        return workHour;
+    }
+
+    public void setWorkHour(String workHour) {
+        this.workHour = workHour;
     }
 }
